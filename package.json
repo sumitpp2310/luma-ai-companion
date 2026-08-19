@@ -1,0 +1,22 @@
+{
+  "name": "luma-ai-companion",
+  "version": "1.0.0",
+  "description": "Luma - AI Companion Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "netlify-dev": "netlify dev"
+  },
+  "dependencies": {
+    "@google/genai": "^2.17.1",
+    "@netlify/blobs": "^11.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.3",
+    "openai": "^7.5.0",
+    "serverless-http": "^4.0.0",
+    "uuid": "^9.0.0"
+  }
+}

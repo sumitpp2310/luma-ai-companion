@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luma - Your Preferences</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="preferences.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#8B5CF6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+    <div class="preferences-container">
+        <div class="progress-bar"><div class="progress" id="progress"></div></div>
+
+        <div class="step active" data-step="1">
+            <div class="step-header">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <circle cx="16" cy="16" r="16" fill="#8B5CF6"/>
+                        <path d="M12 10l8 6-8 6V10z" fill="white"/>
+                    </svg>
+                    <span>luma</span>
+                </div>
+                <h1>what should I call you?</h1>
+                <p>I'd love to know your name so we can have more personal conversations</p>
+            </div>
+            <div class="step-content">
+                <input type="text" id="userName" placeholder="your name" class="pref-input">
+            </div>
+            <div class="step-actions"><button class="next-btn" onclick="nextStep()">continue →</button></div>
+        </div>
+
+        <div class="step" data-step="2">
+            <div class="step-header">
+                <h1>what's your vibe?</h1>
+                <p>pick the tone that matches how you'd like me to talk to you</p>
+            </div>
+            <div class="step-content">
+                <div class="option-grid" id="toneOptions">
+                    <button class="option-card" data-value="friendly"><span class="option-icon">😊</span><span class="option-label">friendly</span><span class="option-desc">warm and cheerful</span></button>
+                    <button class="option-card" data-value="chill"><span class="option-icon">😎</span><span class="option-label">chill</span><span class="option-desc">relaxed and casual</span></button>
+                    <button class="option-card" data-value="professional"><span class="option-icon">💼</span><span class="option-label">professional</span><span class="option-desc">formal and focused</span></button>
+                    <button class="option-card" data-value="witty"><span class="option-icon">🤪</span><span class="option-label">witty</span><span class="option-desc">fun and playful</span></button>
+                </div>
+            </div>
+            <div class="step-actions"><button class="back-btn" onclick="prevStep()">← back</button><button class="next-btn" onclick="nextStep()">continue →</button></div>
+        </div>
+
+        <div class="step" data-step="3">
+            <div class="step-header">
+                <h1>what are you into?</h1>
+                <p>select topics you'd like to chat about</p>
+            </div>
+            <div class="step-content">
+                <div class="tag-container" id="topicTags">
+                    <button class="tag" data-value="technology">💻 technology</button>
+                    <button class="tag" data-value="music">🎵 music</button>
+                    <button class="tag" data-value="gaming">🎮 gaming</button>
+                    <button class="tag" data-value="movies">🎬 movies</button>
+                    <button class="tag" data-value="books">📚 books</button>
+                    <button class="tag" data-value="fitness">💪 fitness</button>
+                    <button class="tag" data-value="cooking">🍳 cooking</button>
+                    <button class="tag" data-value="travel">✈️ travel</button>
+                    <button class="tag" data-value="art">🎨 art</button>
+                    <button class="tag" data-value="science">🔬 science</button>
+                    <button class="tag" data-value="philosophy">🤔 philosophy</button>
+                    <button class="tag" data-value="entrepreneurship">🚀 entrepreneurship</button>
+                </div>
+            </div>
+            <div class="step-actions"><button class="back-btn" onclick="prevStep()">← back</button><button class="next-btn" onclick="nextStep()">continue →</button></div>
+        </div>
+
+        <div class="step" data-step="4">
+            <div class="step-header">
+                <h1>how much should I share?</h1>
+                <p>choose your preferred conversation depth</p>
+            </div>
+            <div class="step-content">
+                <div class="slider-container">
+                    <div class="slider-labels"><span>short & sweet</span><span>detailed</span></div>
+                    <input type="range" id="depthSlider" min="1" max="5" value="3" class="pref-slider">
+                    <div class="slider-value" id="depthValue">balanced</div>
+                </div>
+            </div>
+            <div class="step-actions"><button class="back-btn" onclick="prevStep()">← back</button><button class="next-btn" onclick="nextStep()">continue →</button></div>
+        </div>
+
+        <div class="step" data-step="5">
+            <div class="step-header">
+                <h1>all set!</h1>
+                <p>you're ready to start chatting with luma</p>
+            </div>
+            <div class="step-content">
+                <div class="summary-card">
+                    <div class="summary-item"><span class="summary-label">name</span><span class="summary-value" id="summaryName">-</span></div>
+                    <div class="summary-item"><span class="summary-label">tone</span><span class="summary-value" id="summaryTone">-</span></div>
+                    <div class="summary-item"><span class="summary-label">topics</span><span class="summary-value" id="summaryTopics">-</span></div>
+                    <div class="summary-item"><span class="summary-label">depth</span><span class="summary-value" id="summaryDepth">-</span></div>
+                </div>
+            </div>
+            <div class="step-actions"><button class="back-btn" onclick="prevStep()">← back</button><button class="start-btn" onclick="startChat()">start chatting →</button></div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script src="api.js"></script>
+    <script>
+        if (!API.isAuthenticated()) window.location.href = 'index.html';
+
+        let currentStep = 1;
+        const totalSteps = 5;
+        let preferences = { name: '', tone: '', topics: [], depth: 'balanced' };
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast ' + type + ' show';
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function updateProgress() {
+            document.getElementById('progress').style.width = ((currentStep / totalSteps) * 100) + '%';
+        }
+
+        function showStep(step) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.querySelector('[data-step="' + step + '"]').classList.add('active');
+            updateProgress();
+            if (step === 5) updateSummary();
+        }
+
+        function updateSummary() {
+            document.getElementById('summaryName').textContent = preferences.name;
+            document.getElementById('summaryTone').textContent = preferences.tone;
+            document.getElementById('summaryTopics').textContent = preferences.topics.length > 0 ? preferences.topics.join(', ') : 'none selected';
+            document.getElementById('summaryDepth').textContent = preferences.depth;
+        }
+
+        function nextStep() {
+            if (currentStep === 1) {
+                preferences.name = document.getElementById('userName').value.trim();
+                if (!preferences.name) { showToast('Please enter your name', 'error'); return; }
+            }
+            if (currentStep === 2) {
+                const sel = document.querySelector('#toneOptions .option-card.selected');
+                if (!sel) { showToast('Please select a tone', 'error'); return; }
+                preferences.tone = sel.dataset.value;
+            }
+            if (currentStep === 3) {
+                preferences.topics = Array.from(document.querySelectorAll('#topicTags .tag.selected')).map(t => t.dataset.value);
+            }
+            if (currentStep === 4) {
+                const depthMap = { 1: 'brief', 2: 'concise', 3: 'balanced', 4: 'detailed', 5: 'comprehensive' };
+                preferences.depth = depthMap[document.getElementById('depthSlider').value];
+            }
+            if (currentStep < totalSteps) { currentStep++; showStep(currentStep); }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) { currentStep--; showStep(currentStep); }
+        }
+
+        async function startChat() {
+            try {
+                await API.savePreferences(preferences);
+                const user = JSON.parse(localStorage.getItem('lumaCurrentUser') || '{}');
+                user.name = preferences.name;
+                localStorage.setItem('lumaCurrentUser', JSON.stringify(user));
+                showToast('Welcome, ' + preferences.name + '!', 'success');
+                setTimeout(() => window.location.href = 'companions.html', 1000);
+            } catch (err) {
+                showToast('Failed to save preferences', 'error');
+            }
+        }
+
+        document.querySelectorAll('#toneOptions .option-card').forEach(c => {
+            c.addEventListener('click', function() {
+                document.querySelectorAll('#toneOptions .option-card').forEach(x => x.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+        document.querySelectorAll('#topicTags .tag').forEach(t => {
+            t.addEventListener('click', function() { this.classList.toggle('selected'); });
+        });
+        document.getElementById('depthSlider').addEventListener('input', function() {
+            const m = { 1: 'brief', 2: 'concise', 3: 'balanced', 4: 'detailed', 5: 'comprehensive' };
+            document.getElementById('depthValue').textContent = m[this.value];
+        });
+
+        updateProgress();
+    </script>
+    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}</script>
+</body>
+</html>

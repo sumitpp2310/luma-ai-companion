@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luma - Your Companions</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="companions.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#8B5CF6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+    <div class="companions-container">
+        <div class="companions-header">
+            <div class="header-top">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <circle cx="16" cy="16" r="16" fill="#8B5CF6"/>
+                        <path d="M12 10l8 6-8 6V10z" fill="white"/>
+                    </svg>
+                    <span>luma</span>
+                </div>
+                <div class="user-menu">
+                    <span id="userName">User</span>
+                    <button class="icon-btn" onclick="window.location.href='preferences.html'">⚙️</button>
+                </div>
+            </div>
+            <h1>✨ your companions</h1>
+            <p>Discover and connect with your AI companions.</p>
+        </div>
+        <div class="search-filter-section">
+            <div class="search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Search companions...">
+            </div>
+            <div class="filter-pills">
+                <button class="pill active" data-filter="all">all</button>
+                <button class="pill" data-filter="funny">😂 funny</button>
+                <button class="pill" data-filter="confident">💪 confident</button>
+                <button class="pill" data-filter="shy">😊 shy</button>
+                <button class="pill" data-filter="caring">❤️ caring</button>
+                <button class="pill" data-filter="mysterious">🌙 mysterious</button>
+                <button class="pill" data-filter="adventurous">🚀 adventurous</button>
+            </div>
+        </div>
+        <div class="companions-grid" id="companionsGrid"></div>
+    </div>
+    <script src="api.js"></script>
+    <script>
+        if (!API.isAuthenticated()) window.location.href = 'index.html';
+
+        const currentUser = JSON.parse(localStorage.getItem('lumaCurrentUser') || '{}');
+        if (currentUser.name) document.getElementById('userName').textContent = currentUser.name;
+
+        let allCompanions = [];
+        let activeFilter = 'all';
+
+        async function loadCompanions() {
+            try {
+                allCompanions = await API.getCompanions();
+                renderCompanions();
+            } catch (err) {
+                console.error('Failed to load companions:', err);
+            }
+        }
+
+        function renderCompanions() {
+            const grid = document.getElementById('companionsGrid');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            grid.innerHTML = '';
+            allCompanions.filter(c => {
+                const traits = c.personality.core || [];
+                const matchesFilter = activeFilter === 'all' || traits.includes(activeFilter);
+                const matchesSearch = c.name.toLowerCase().includes(search) || c.bio.toLowerCase().includes(search) || traits.some(t => t.includes(search));
+                return matchesFilter && matchesSearch;
+            }).forEach(c => {
+                const traits = c.personality.core || [];
+                const mood = c.current_mood || { display: '😊 feeling cheerful' };
+                const card = document.createElement('div');
+                card.className = 'companion-card';
+                card.dataset.traits = traits.join(',');
+                card.dataset.name = c.name;
+                card.dataset.age = c.age;
+                card.dataset.gender = c.gender;
+                card.innerHTML = '<button class="speak-btn" title="Hear my voice">🔊</button><div class="card-avatar" style="background-color:' + c.color + ';">' + c.avatar_initial + '</div><div class="card-identity"><h3>' + c.name + '</h3><span>' + c.age + ' years old</span></div><p class="card-bio">' + c.bio + '</p><div class="card-tags">' + traits.slice(0, 3).map(function(t) { return '<span class="tag">' + t + '</span>'; }).join('') + '</div><div class="card-status"><span class="status-emoji">' + (mood.emoji || '😊') + '</span><span class="status-text">' + mood.display + '</span></div>';
+                card.querySelector('.speak-btn').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    speakCompanion(c, 'Hey! I\'m ' + c.name + ', nice to meet you!');
+                });
+                card.addEventListener('click', function() {
+                    speakCompanion(c, 'Hey! I\'m ' + c.name + ', nice to meet you! Let\'s chat!');
+                    localStorage.setItem('selectedCompanion', c.id);
+                    setTimeout(function() { window.location.href = 'chat.html'; }, 1500);
+                });
+                grid.appendChild(card);
+            });
+        }
+
+        function speakCompanion(comp, text) {
+            if (!window.speechSynthesis) return;
+            speechSynthesis.cancel();
+            const vc = comp.voice_config || {};
+            const cleanText = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
+            if (!cleanText) return;
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.pitch = vc.pitch || 1.0;
+            utterance.rate = vc.rate || 1.0;
+            speechSynthesis.speak(utterance);
+        }
+
+        document.querySelectorAll('.pill').forEach(function(pill) {
+            pill.addEventListener('click', function() {
+                document.querySelectorAll('.pill').forEach(function(p) { p.classList.remove('active'); });
+                this.classList.add('active');
+                activeFilter = this.dataset.filter;
+                renderCompanions();
+            });
+        });
+
+        document.getElementById('searchInput').addEventListener('input', renderCompanions);
+
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = function() {};
+        }
+
+        loadCompanions();
+    </script>
+    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}</script>
+</body>
+</html>

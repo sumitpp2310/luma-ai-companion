@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luma - Sign In</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#8B5CF6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+    <div class="login-container">
+        <div class="header">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <circle cx="16" cy="16" r="16" fill="#8B5CF6"/>
+                    <path d="M12 10l8 6-8 6V10z" fill="white"/>
+                </svg>
+                <span>luma</span>
+            </div>
+            <h1>welcome back</h1>
+            <p>sign in to continue your conversations</p>
+        </div>
+        <form class="login-form" id="loginForm">
+            <div class="input-group">
+                <label for="email">email</label>
+                <input type="email" id="email" placeholder="you@example.com">
+                <span class="error-message" id="emailError">Please enter a valid email</span>
+            </div>
+            <div class="input-group">
+                <label for="password">password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" placeholder="your password">
+                    <button type="button" class="toggle-password">show</button>
+                </div>
+                <span class="error-message" id="passwordError">Password is required</span>
+            </div>
+            <div class="options-row">
+                <label class="remember-me">
+                    <input type="checkbox" id="rememberMe">
+                    <span>remember me</span>
+                </label>
+                <a class="forgot-password" id="forgotPasswordBtn">forgot password?</a>
+            </div>
+            <button type="submit" class="sign-in-btn" id="signInBtn">sign in →</button>
+        </form>
+    </div>
+    <div class="footer">
+        <p>don't have an account? <a href="signup.html">create one</a></p>
+    </div>
+    <div class="bottom-logo" onclick="window.location.reload()">
+        <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="16" fill="#8B5CF6"/>
+            <path d="M12 10l8 6-8 6V10z" fill="white"/>
+        </svg>
+    </div>
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal">
+            <h2>reset password</h2>
+            <p>Enter your email address and we'll send you a link to reset your password.</p>
+            <input type="email" id="resetEmail" placeholder="you@example.com">
+            <div class="modal-buttons">
+                <button class="cancel-btn" id="cancelReset">cancel</button>
+                <button class="submit-btn" id="sendResetLink">send link</button>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script src="api.js"></script>
+    <script>
+        if (API.isAuthenticated()) window.location.href = 'companions.html';
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast ' + type + ' show';
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+        function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+        function showError(i, e) { document.getElementById(i).classList.add('error'); document.getElementById(e).classList.add('visible'); }
+        function hideError(i, e) { document.getElementById(i).classList.remove('error'); document.getElementById(e).classList.remove('visible'); }
+
+        document.querySelector('.toggle-password').addEventListener('click', function() {
+            const p = document.getElementById('password');
+            p.type = p.type === 'password' ? 'text' : 'password';
+            this.textContent = p.type === 'password' ? 'show' : 'hide';
+        });
+
+        document.getElementById('email').addEventListener('input', function() {
+            if (validateEmail(this.value)) { hideError('email', 'emailError'); this.classList.add('success'); }
+        });
+        document.getElementById('password').addEventListener('input', function() {
+            if (this.value) hideError('password', 'passwordError');
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            let valid = true;
+            if (!validateEmail(email)) { showError('email', 'emailError'); valid = false; }
+            if (!password) { showError('password', 'passwordError'); valid = false; }
+            if (!valid) return;
+            const btn = document.getElementById('signInBtn');
+            btn.disabled = true; btn.textContent = 'signing in...';
+            try {
+                const result = await API.signin(email, password);
+                API.setSession(result.sessionId);
+                localStorage.setItem('lumaCurrentUser', JSON.stringify(result.user));
+                showToast('Successfully signed in!', 'success');
+                setTimeout(() => {
+                    window.location.href = 'preferences.html';
+                }, 800);
+            } catch (err) {
+                showToast(err.message || 'Invalid credentials', 'error');
+            }
+            btn.disabled = false; btn.textContent = 'sign in →';
+        });
+
+        document.getElementById('forgotPasswordBtn').addEventListener('click', () => {
+            document.getElementById('forgotPasswordModal').classList.add('active');
+            document.getElementById('resetEmail').value = document.getElementById('email').value;
+        });
+        document.getElementById('cancelReset').addEventListener('click', () => {
+            document.getElementById('forgotPasswordModal').classList.remove('active');
+        });
+        document.getElementById('forgotPasswordModal').addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('active');
+        });
+        document.getElementById('sendResetLink').addEventListener('click', () => {
+            document.getElementById('forgotPasswordModal').classList.remove('active');
+            showToast('Password reset link sent!', 'success');
+        });
+    </script>
+    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}</script>
+</body>
+</html>

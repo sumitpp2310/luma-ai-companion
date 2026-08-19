@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luma - Chat</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="chat.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#8B5CF6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+                        <circle cx="16" cy="16" r="16" fill="#8B5CF6"/>
+                        <path d="M12 10l8 6-8 6V10z" fill="white"/>
+                    </svg>
+                    <span>luma</span>
+                </div>
+                <div class="sidebar-search">
+                    <input type="text" placeholder="Search chats...">
+                </div>
+            </div>
+            <button class="new-chat-btn" id="newChatBtn">+ New Chat</button>
+            <div class="chat-list" id="chatList">
+                <div class="chat-list-label">CHATS</div>
+            </div>
+            <div class="sidebar-footer">
+                <div class="system-status">
+                    <span class="status-dot"></span>
+                    <span>System Active</span>
+                </div>
+                <button class="settings-btn" onclick="window.location.href='companions.html'">⚙️</button>
+            </div>
+        </aside>
+
+        <main class="chat-panel">
+            <div class="chat-header">
+                <div class="header-left">
+                    <span class="companion-name" id="companionName">Aria</span>
+                    <span class="online-status">• Online</span>
+                </div>
+                <button class="toggle-panel-btn" id="togglePanelBtn">☰</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-avatar">A</div>
+                    <div class="message-content">
+                        <p id="welcomeMessage">Hey there! I'm Aria, your AI companion. How can I help you today?</p>
+                        <button class="msg-speak-btn">🔊</button>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <button class="attach-btn">+</button>
+                    <input type="text" id="chatInput" placeholder="Type a message..." class="chat-input">
+                    <button class="send-btn" id="sendBtn">→</button>
+                </div>
+            </div>
+        </main>
+
+        <aside class="info-panel" id="infoPanel">
+            <div class="panel-header">
+                <button class="close-panel-btn" id="closePanelBtn">✕</button>
+            </div>
+            <div class="panel-content">
+                <div class="profile-section">
+                    <div class="profile-avatar" id="profileAvatar">A</div>
+                    <h2 class="profile-name" id="profileName">Aria</h2>
+                    <span class="profile-age" id="profileAge">20 years old</span>
+                    <span class="profile-mood" id="profileMood">Playful</span>
+                </div>
+                <div class="traits-section">
+                    <h3>TRAITS</h3>
+                    <div class="tags-container" id="traitsContainer"></div>
+                </div>
+                <div class="memories-section">
+                    <h3>MEMORIES</h3>
+                    <div class="memories-list" id="memoriesList"></div>
+                </div>
+                <div class="relationship-section">
+                    <h3>RELATIONSHIP</h3>
+                    <div class="relationship-info">
+                        <span class="level">Level 4</span>
+                        <span class="xp">414 XP</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+                <div class="voice-section">
+                    <h3>VOICE</h3>
+                    <div class="voice-controls">
+                        <div class="voice-field">
+                            <label>Style</label>
+                            <select id="voiceStyle">
+                                <option value="playful">Playful</option>
+                                <option value="gentle">Gentle</option>
+                                <option value="energetic">Energetic</option>
+                                <option value="contemplative">Contemplative</option>
+                                <option value="cute">Cute</option>
+                                <option value="mysterious">Mysterious</option>
+                                <option value="neutral">Neutral</option>
+                            </select>
+                        </div>
+                        <div class="voice-field">
+                            <label>Pitch <span id="pitchVal">1.0</span></label>
+                            <input type="range" id="voicePitch" min="0.5" max="2.0" step="0.05" value="1.0">
+                        </div>
+                        <div class="voice-field">
+                            <label>Speed <span id="rateVal">1.0</span></label>
+                            <input type="range" id="voiceRate" min="0.5" max="2.0" step="0.05" value="1.0">
+                        </div>
+                        <div class="voice-field">
+                            <label>Volume <span id="volVal">1.0</span></label>
+                            <input type="range" id="voiceVolume" min="0.1" max="1.0" step="0.05" value="1.0">
+                        </div>
+                        <div class="voice-field">
+                            <label>Language</label>
+                            <select id="voiceLanguage">
+                                <option value="en-US">English (US)</option>
+                                <option value="en-GB">English (UK)</option>
+                                <option value="es-ES">Spanish</option>
+                                <option value="fr-FR">French</option>
+                                <option value="de-DE">German</option>
+                                <option value="ja-JP">Japanese</option>
+                                <option value="ko-KR">Korean</option>
+                            </select>
+                        </div>
+                        <button class="voice-save-btn" id="saveVoiceBtn">Save Voice</button>
+                        <button class="voice-test-btn" id="testVoiceBtn">Test Voice</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="chat.js"></script>
+    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}</script>
+</body>
+</html>
